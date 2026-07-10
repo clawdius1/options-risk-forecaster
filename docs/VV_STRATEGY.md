@@ -76,11 +76,58 @@ Hold grid (combo, quiet<1.1): hold=1 Sharpe 0.36 · **hold=3 Sharpe 1.05** · ho
 - No earnings filter: many 2σ moves are earnings gaps, where the flow logic differs.
 - Daily bars only; "velocity" is close-to-close. Intraday velocity untested.
 
+## v2 (2026-07-10, `vv_v2.py`) — filters, walk-forward, Hedgeye head-to-head
+
+The firm is **Hedgeye**. User-set success criterion: beat *trading* Hedgeye's ranges
+(buy low end / sell mid or high end), not just their hit rates.
+
+v2 adds: fade leg only above the 200d SMA (regime filter); skip signals within ±1
+calendar day of earnings (yfinance earnings dates, cached in `earnings_dates.csv`);
+walk-forward validation (grid trained 2020-06 → 2024-12, params frozen, tested
+2025-01 → 2026-07).
+
+### Walk-forward (train Sharpe → frozen-params out-of-sample)
+
+Chosen on train: trigger 1.5σ, quiet <1.5×, heavy ≥2.0×, hold 3. Train Sharpe **1.59**
+(182 trades, 59.3% win, maxDD −1.5%). Out-of-sample 2025-01 → 2026-07:
+
+| Strategy (OOS) | Trades | Win% | Avg/trade | Total | Sharpe | MaxDD |
+|---|---|---|---|---|---|---|
+| vv_combo | 87 | 47.1% | +0.22% | +2.6% | **0.48** | −4.3% |
+| buy & hold eq-weight | — | — | — | +23.2% | 0.64 | −26.8% |
+
+**Honest read:** train Sharpe 1.59 decays to 0.48 OOS — partly regime (2025–26 was
+flat/choppy for these names), partly optimism in the grid pick. The earnings filter is
+real, though: without it the same OOS combo scores 0.20 and the breakout leg is negative.
+
+### Head-to-head vs the Hedgeye playbook (their window, 2025-12 → 2026-07)
+
+| Strategy | Trades | Win% | Avg/trade | Total | Sharpe | MaxDD |
+|---|---|---|---|---|---|---|
+| **vv_combo (ours)** | 34 | 58.8% | +0.50% | +2.1% | **0.88** | −4.3% |
+| Hedgeye buy-low → sell-mid (canonical) | 58 | 63.8% | +0.13% | +1.2% | 0.33 | −2.9% |
+| Hedgeye buy-low → hold 3 | 67 | 40.3% | −0.32% | −2.3% | −0.58 | −3.7% |
+| Hedgeye buy-break-HIGH → hold 3 | 61 | 60.7% | +1.28% | **+9.2%** | **2.74** | −2.6% |
+| Buy & hold eq-weight | — | — | — | −3.1% | −0.14 | −17.1% |
+
+**Verdict on the user's test (confidence: moderate, N≈150 days):**
+
+1. **We beat Hedgeye's canonical playbook** — vv_combo Sharpe 0.88 vs 0.33 for
+   buy-low/sell-mid, and their buy-low/hold loses money outright.
+2. The **best strategy on the window is anti-Hedgeye use of their own product**: buying
+   *breakouts above their published high* (Sharpe 2.74, +9.2%). Their high is a good
+   momentum trigger, not a sell level — consistent with the market-structure thesis
+   (flows persist) and with fade legs struggling in this tape.
+3. One regime, ~60 trades: the breakout result needs to survive a longer window before
+   trusting it. It is the single most promising lead to pursue.
+
 ## Next steps
 
-1. Regime filter on the fade leg (200d trend filter); re-test.
-2. Earnings-date handling (exclude or treat as its own signal class).
-3. Walk-forward parameter validation (train 2021–2024, test 2025–2026) before trusting
-   any tuned numbers.
-4. Multi-day velocity (3-day cumulative standardized move) as alternative trigger.
-5. Paper-trade via a morning cron once rules are frozen.
+1. ~~Regime filter on the fade leg.~~ **Done in v2** (200d SMA).
+2. ~~Earnings-date handling.~~ **Done in v2** (±1d skip; materially improves OOS).
+3. ~~Walk-forward validation.~~ **Done in v2** (train ≤2024, test 2025+).
+4. **New priority:** test "breakout above the range high" on the long history using
+   statistical bands (Hedgeye highs only exist for 150 days) — is Sharpe 2.7 regime
+   luck or a durable edge?
+5. Multi-day velocity (3-day cumulative standardized move) as alternative trigger.
+6. Paper-trade via a morning cron once rules are frozen.
