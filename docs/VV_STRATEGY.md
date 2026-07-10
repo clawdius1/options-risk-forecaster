@@ -121,13 +121,45 @@ real, though: without it the same OOS combo scores 0.20 and the breakout leg is 
 3. One regime, ~60 trades: the breakout result needs to survive a longer window before
    trusting it. It is the single most promising lead to pursue.
 
+## v3 (2026-07-10, `vv_v3_breakout.py`) — long-history breakout validation
+
+Question: is the Hedgeye-window breakout result (Sharpe 2.74) durable or regime luck?
+Tested the breakout family 2020-06 → 2026-07 (hold 3, earnings filter on, long-only):
+σ-band tops (1.5/2.0/2.5σ) and Donchian new-N-day-high (20/55d), each × volume filter
+(none / ≥1.5× / ≥2.0×).
+
+| Variant | Trades | Win% | Avg/trade | Total | Sharpe | MaxDD |
+|---|---|---|---|---|---|---|
+| σ≥1.5 + vol≥2.0 | 69 | 62.3% | +1.24% | +10.0% | **0.92** | −2.1% |
+| σ≥2.0 + vol≥2.0 | 57 | 63.2% | +1.32% | +8.7% | 0.91 | −1.9% |
+| 20d-high, no vol filter | 1079 | 53.2% | +0.30% | **+47.5%** | 0.87 | −10.8% |
+| σ≥1.5, no vol filter | 630 | 50.0% | −0.02% | −0.2% | 0.03 | −14.6% |
+| buy & hold eq-weight | — | — | — | +412.5% | 1.09 | −46.2% |
+
+Per-year Sharpe (regime dependence): heavy-volume σ-breakouts were great 2021–22 and 2024,
+**negative in 2023**, flat 2025–26. The unfiltered **20d-high Donchian** is the most
+consistent recently (2025: 0.97, **2026: 2.12**) with one bad year (2022: −0.84).
+
+**Verdict (confidence: high):**
+
+1. **Sharpe 2.74 was regime + level luck** — no statistical analog reproduces it over 6
+   years; the chosen winner scores only 0.52 on the same Hedgeye window (n=9).
+2. Two durable family members survive: **heavy-volume σ-breakouts** (Sharpe ~0.9,
+   +1.2–1.4%/trade, maxDD ~−2%, but only ~10 trades/yr) and the **20d-high momentum
+   breakout** (Sharpe 0.87 with 1,079 trades and the best 2025–26 record — likely what
+   the Hedgeye-high trigger was really proxying).
+3. Volume confirmation is decisive for σ-breakouts (Sharpe 0.03 → 0.92 as the volume
+   threshold rises) — strongest single confirmation of the volume thesis in the project.
+4. Nothing beats buy-and-hold's full-period Sharpe (1.09) on these 9 names in a
+   melt-up sample, but the breakout overlays carry ~1/5 to 1/20 of its −46% drawdown.
+
 ## Next steps
 
-1. ~~Regime filter on the fade leg.~~ **Done in v2** (200d SMA).
-2. ~~Earnings-date handling.~~ **Done in v2** (±1d skip; materially improves OOS).
-3. ~~Walk-forward validation.~~ **Done in v2** (train ≤2024, test 2025+).
-4. **New priority:** test "breakout above the range high" on the long history using
-   statistical bands (Hedgeye highs only exist for 150 days) — is Sharpe 2.7 regime
-   luck or a durable edge?
-5. Multi-day velocity (3-day cumulative standardized move) as alternative trigger.
-6. Paper-trade via a morning cron once rules are frozen.
+1. ~~Regime filter, earnings handling, walk-forward.~~ Done in v2.
+2. ~~Long-history breakout validation.~~ **Done in v3** (above).
+3. Candidate production rule: **20d-high breakout + heavy-volume σ-fade combo**;
+   walk-forward it as one portfolio before freezing.
+4. Paper-trade via a morning cron once rules are frozen.
+5. Brokerage data (user has Schwab, Robinhood, IBKR — personal accounts): only needed
+   when we go intraday (velocity within the day) or live. Preference then: Schwab official
+   API or IBKR (best historical intraday); daily yfinance suffices for research so far.
