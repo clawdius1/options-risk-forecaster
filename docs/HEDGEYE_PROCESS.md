@@ -40,6 +40,17 @@ encoding their playbook as (a) the fair benchmark and (b) rules for our own syst
 - Their band width ≈ 2σ of 20d realized vol (firm/RV2 width ratio 1.01 on N=1,350).
 - Their TREND flag ≈ price vs ~100d SMA + momentum confirms (87% single rule, 94% tree).
 
+## FAQ details (from their site)
+
+- **Exact buy rule:** bullish TREND + price at/near LRR = "buying the dip." No other buy condition.
+- **Exact short rule:** bearish TREND + price rallies to TRR → short there ("immediate-term
+  overbought within a bearish intermediate trend"). Never short bullish-trend assets.
+- **Why ranges move daily:** the model widens with rising volatility, narrows when vol
+  collapses — stated goal is to "front-run risk." (Matches our finding: width ≈ 3.5–4×
+  trailing daily vol, i.e. a ~2σ vol-scaled band recomputed daily.)
+- **FX convention:** pair BULLISH = first currency strengthens vs second (EUR/USD bullish
+  = euro strengthens).
+
 ## Open questions for the full 2020+ dataset
 
 1. Does their flag LEAD or LAG the simple momentum rule at flips? (Lead = real info.)
