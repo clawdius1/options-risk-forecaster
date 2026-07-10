@@ -18,6 +18,7 @@ Blends **options-implied vol** with **realized vol** to forecast next-day risk r
 | `fetch_historical_iv.py` | Free historical IV pull from AlphaQuery |
 | `run_iv_backtest.py` | Proper hist-IV vs firm vs RV backtest |
 | `regression.py` / `grid_search_offline.py` | Offline analysis helpers |
+| `analyze_extensions.py` | Intraday pierce rates + RV lookback grid (10/20/30/60d) |
 | CSVs | Signals, IV cache, and backtest outputs |
 
 ## Data files
@@ -63,7 +64,13 @@ python run_iv_backtest.py \
   --save-csv backtest_results_hist_iv.csv
 ```
 
-Python **3.9+** works (developed on 3.9/3.11). No API keys needed for the free path.
+Python **3.9+** works (developed on 3.9/3.11; verified on 3.14). No API keys needed for the free path.
+
+**Windows:** set `PYTHONUTF8=1` before running (scripts print `→`/`σ`, which crashes the default cp1252 console encoding).
+
+```powershell
+$env:PYTHONUTF8='1'
+```
 
 ---
 
@@ -99,6 +106,17 @@ Firm width ≈ **exactly 2σ of 20d RV** (firm/RV2 width ratio ≈ **1.01×**).
 | RV 2σ | **83.1%** | $30.30 |
 | Research Firm | **76.0%** | $30.70 |
 
+### Intraday pierce rates + RV lookback grid (added 2026-07-10) — confidence: **high**
+
+| Method | Close hit | Intraday contained | Mean width |
+|--------|-----------|--------------------|------------|
+| Research Firm (N=1,350) | 76.4% | 60.0% | $27.00 |
+| RV 2σ 20d (N=1,350) | 82.2% | 68.4% | $26.70 |
+| **RV 2σ 60d (N=1,350)** | **83.9%** | **72.5%** | $27.03 |
+| IV 2σ hist (N=549) | 83.2% | 73.0% | $29.52 |
+
+Scoring on next-day **high/low containment** (harder than close) leaves the ranking unchanged — statistical 2σ bands beat firm by even more. RV lookback grid is monotone: **60d beats 20d at the same width** and matches hist-IV coverage with no IV data. Details in `docs/RESULTS.md` §C–D.
+
 ### Material conclusions
 
 1. Sample-size problem is **solved** for firm + RV (1,350 obs).
@@ -106,6 +124,7 @@ Firm width ≈ **exactly 2σ of 20d RV** (firm/RV2 width ratio ≈ **1.01×**).
 3. On the free hist-IV window, **IV 2σ and RV 2σ both beat the firm** at similar width (~83% vs 76%).
 4. **IV does not dominate RV** in coverage (tie); IV is a better predictor of **|next-day return|** (R² 0.148 vs 0.101). **IV−RV spread** has ~0 R² alone.
 5. **Do not trust yfinance ATM IV for historical rows** — live chain only. Always use `historical_iv.csv` / paid feed for history.
+6. Intraday-containment scoring and RV-lookback grid (2026-07-10) both **confirm** conclusions 2–3; recommended RV lookback default is now **60d** (was 20d).
 
 ### Hard limit
 
@@ -134,6 +153,7 @@ Read **`docs/HANDOFF.md` first** on a new machine.
 | Firm CSV (1,359) | loaded |
 | Full firm/RV backtest | complete |
 | Free hist IV + IV backtest | complete on ~3mo window |
+| Pierce rates (high/low) + RV lookback grid | complete (2026-07-10) |
 | Daily cron accumulation | **not** set up (on hold) |
 | Paid full-history IV | **blocked** on API key |
 

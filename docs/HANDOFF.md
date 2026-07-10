@@ -96,10 +96,11 @@ options-risk-forecaster/
 ## Open decisions / next work
 
 1. **Paid hist IV** for Dec 2025–Apr 2026 gap (~800 rows) if full-period IV vs firm is required.
-2. Optional: pierce rates on next-day **high/low** not just close.
-3. Optional: lookback grid on RV (10/20/30/60d) vs firm.
+2. ~~Pierce rates on next-day **high/low** not just close.~~ **Done 2026-07-10** — `analyze_extensions.py`, RESULTS.md §C. Ranking vs firm unchanged, gap wider.
+3. ~~Lookback grid on RV (10/20/30/60d) vs firm.~~ **Done 2026-07-10** — RESULTS.md §D. 60d wins monotonically; new recommended default.
 4. Optional: DTE filter if using options chains with paid data.
 5. Optional: morning cron to append daily forecasts (user previously held this off while gathering firm points).
+6. Optional: earnings-calendar filter (pierces likely cluster on earnings days).
 
 ---
 

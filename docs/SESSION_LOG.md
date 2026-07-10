@@ -29,6 +29,16 @@ Chronological decisions and outcomes for machine migration. Not a full transcrip
 7. Result on N=549: IV2σ 83.2%, RV2σ 83.1%, firm 76.0%; best blend w≈0.5 → 84.0%; |ret| R² IV>RV; spread ~0.
 8. Packaging for GitHub migration: docs/* , README overhaul, gitignore, requirements pin text, `.env.example`.
 
+## 2026-07-10 (later) — New machine onboard + extension analyses
+
+1. Cloned to new Windows machine: `C:\Users\hedesa\OneDrive - SAS\Code\ticker\options-risk-forecaster\` (Python 3.14 venv).
+2. Sanity re-run of `run_iv_backtest.py` **reproduced documented numbers exactly** (IV2σ 83.2% / RV2σ 83.1% / firm 76.0% / best blend w=0.5 → 84.0%).
+3. Windows note: scripts print `→` and `σ`; run with `PYTHONUTF8=1` to avoid cp1252 `UnicodeEncodeError`.
+4. Built `analyze_extensions.py` — closes HANDOFF open items 2 (high/low pierce rates) and 3 (RV lookback grid):
+   - Intraday containment: firm 60.0% vs RV2σ 68.4% (N=1,350); IV2σ 73.0% on subset. Ranking vs firm unchanged, gap wider than on close-hit.
+   - Lookback grid: monotone improvement with longer lookback; **60d RV 2σ = 83.9% close hit / 72.5% contained at same width as firm** — matches hist-IV coverage with no IV data.
+5. Artifacts: `backtest_results_extensions_pierce.csv`, `backtest_results_extensions_rv_lookback.csv`.
+
 ## Hermes-adjacent context that is **not** this repo
 
 - Agentic Commerce Fraud project: `~/Documents/agentic_commerce_fraud` → `clawdius1/agentic-commerce-fraud`.
