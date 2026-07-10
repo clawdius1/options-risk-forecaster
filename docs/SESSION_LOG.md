@@ -39,6 +39,17 @@ Chronological decisions and outcomes for machine migration. Not a full transcrip
    - Lookback grid: monotone improvement with longer lookback; **60d RV 2σ = 83.9% close hit / 72.5% contained at same width as firm** — matches hist-IV coverage with no IV data.
 5. Artifacts: `backtest_results_extensions_pierce.csv`, `backtest_results_extensions_rv_lookback.csv`.
 
+## 2026-07-10 (evening) — Direction change: stock-only volume+velocity algo
+
+1. User decision: **no derivatives** (too much leverage) — long-only stock trading.
+   New approach on branch `volume-velocity-algo`; main branch keeps the risk-range research.
+2. Design agreed via Q&A: test fade + breakout with volume/velocity as the switch;
+   long-only; 1–5 day swing; develop on ~5y daily data, validate on firm-CSV window.
+3. Built `vv_strategy.py` + `docs/VV_STRATEGY.md`. v1 findings: volume filter doubles
+   breakout per-trade edge (+0.19%→+0.80%); combo Sharpe 1.10 vs B&H 0.94 with 1/13 the
+   drawdown; fades lose in the recent down tape → regime filter is next; firm bands add
+   nothing as trigger levels vs statistical 2σ bands.
+
 ## Hermes-adjacent context that is **not** this repo
 
 - Agentic Commerce Fraud project: `~/Documents/agentic_commerce_fraud` → `clawdius1/agentic-commerce-fraud`.
