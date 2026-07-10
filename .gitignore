@@ -22,3 +22,7 @@ __pycache__/
 # Optional local scratch
 *.tmp
 .cache/
+
+# Local database (rebuildable from loaders)
+market.duckdb
+market.duckdb.wal
