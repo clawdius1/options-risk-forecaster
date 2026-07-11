@@ -30,7 +30,8 @@ MONTHS = {m.lower(): i + 1 for i, m in enumerate(
 
 
 def slug_to_date(slug: str):
-    m = re.match(r"([a-z]+)-(\d{1,2})-(\d{4})", slug.strip().lower())
+    s = re.sub(r"^(correction|update[d]?)-", "", slug.strip().lower())
+    m = re.match(r"([a-z]+)-(\d{1,2})(?:st|nd|rd|th)?-(\d{4})", s)
     if not m or m.group(1) not in MONTHS:
         return None
     return pd.Timestamp(int(m.group(3)), MONTHS[m.group(1)], int(m.group(2)))
@@ -44,7 +45,7 @@ def to_num(s):
 
 
 def main():
-    files = sorted(DOWNLOADS.glob("hedgeye_rr_checkpoint_*.csv")) + list(DOWNLOADS.glob("hedgeye_rr_final*.csv"))
+    files = sorted(DOWNLOADS.glob("hedgeye_rr_*.csv"))
     if not files:
         raise SystemExit("No hedgeye_rr_*.csv files found in Downloads")
     frames = []
@@ -70,7 +71,10 @@ def main():
     df["high"] = df[["buy_trade", "sell_trade"]].max(axis=1)
 
     before = len(df)
-    df = df.sort_values(["date", "ticker"]).drop_duplicates(subset=["date", "ticker"], keep="first")
+    # corrections outrank the original post for the same (date, ticker)
+    df["is_correction"] = df["date_slug"].str.lower().str.startswith("correction")
+    df = (df.sort_values(["date", "ticker", "is_correction"], ascending=[True, True, False])
+            .drop_duplicates(subset=["date", "ticker"], keep="first"))
     print(f"Dedupe: {before} -> {len(df)}")
 
     out = df[["date", "ticker", "trend", "buy_trade", "sell_trade", "prev_close", "low", "high"]]
